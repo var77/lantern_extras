@@ -39,7 +39,7 @@ jobs:
         with:
           context: .
           platforms: linux/amd64
-          file: Dockerfile.cli${{ (matrix.device == gpu && 'cuda' || '') }}
+          file: Dockerfile.cli${{ (matrix.device == 'gpu' && 'cuda' || '') }}
           push: true
           # the :latest tag will refer to cpu version
-          tags: ${{ (matrix.device == cpu && format('{0}:latest', inputs.IMAGE_NAME) || '') }},${{ inputs.IMAGE_NAME }}:latest-${{ matrix.device }},${{ inputs.IMAGE_NAME }}:${{ inputs.VERSION }}-${{ matrix.device }}
+          tags: ${{ (matrix.device == 'cpu' && format('{0}:latest', inputs.IMAGE_NAME) || '') }},${{ inputs.IMAGE_NAME }}:latest-${{ matrix.device }},${{ inputs.IMAGE_NAME }}:${{ inputs.VERSION }}-${{ matrix.device }}
