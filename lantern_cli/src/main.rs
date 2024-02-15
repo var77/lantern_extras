@@ -50,7 +50,7 @@ fn main() {
         cli::Commands::PQTable(args) => {
             let logger = Logger::new("Lantern PQ", LogLevel::Debug);
             _main_logger = Some(logger.clone());
-            lantern_pq::quantize_table(&args, None, None, Some(logger))
+            lantern_pq::quantize_table(args, None, None, Some(logger))
         }
         cli::Commands::StartDaemon(args) => {
             let logger = Logger::new("Lantern Daemon", args.log_level.value());
