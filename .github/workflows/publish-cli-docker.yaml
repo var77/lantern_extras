@@ -6,7 +6,7 @@ on:
         type: string
         description: "CLI version"
         required: true
-        default: "0.0.38"
+        default: "0.0.39"
       IMAGE_NAME:
         type: string
         description: "Container image name to tag"
@@ -43,3 +43,9 @@ jobs:
           push: true
           # the :latest tag will refer to cpu version
           tags: ${{ (matrix.device == 'cpu' && format('{0}:latest', inputs.IMAGE_NAME) || format('{0}:gpu', inputs.IMAGE_NAME)) }},${{ inputs.IMAGE_NAME }}:latest-${{ matrix.device }},${{ inputs.IMAGE_NAME }}:${{ inputs.VERSION }}-${{ matrix.device }}
+      - name: Push to GCR
+        run: |
+          echo ${{ secrets.GCP_CREDENTIALS_JSON_B64 }} | base64 -d | docker login -u _json_key --password-stdin https://gcr.io
+          CURRENT_IMAGE=${{ inputs.IMAGE_NAME }}:${{ inputs.VERSION }}-${{ matrix.device }}
+          docker tag  ${CURRENT_IMAGE}  ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${CURRENT_IMAGE}
+          docker push ${CURRENT_IMAGE}
