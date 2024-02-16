@@ -54,6 +54,6 @@ jobs:
             # ${{ inputs.IMAGE_NAME }}:latest-${{ matrix.device }}
             # ${{ inputs.IMAGE_NAME }}:${{ inputs.VERSION }}-${{ matrix.device }}
             # GCR tags
-            ${{ (matrix.device == 'cpu' && format('{0}-docker.pkg.dev/{1}/{2}:latest', secrets.GCP_REGION, secrets.GCP_PROJECT_ID, inputs.IMAGE_NAME) || format('{0}-docker.pkg.dev/{1}/{2}:gpu', secrets.GCP_REGION, secrets.GCP_PROJECT_ID, inputs.IMAGE_NAME) }}
+            ${{ (matrix.device == 'cpu' && format('{0}-docker.pkg.dev/{1}/{2}:latest', secrets.GCP_REGION, secrets.GCP_PROJECT_ID, inputs.IMAGE_NAME) || format('{0}-docker.pkg.dev/{1}/{2}:gpu', secrets.GCP_REGION, secrets.GCP_PROJECT_ID, inputs.IMAGE_NAME)) }}
             ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ inputs.IMAGE_NAME }}:latest-${{ matrix.device }}
             ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ inputs.IMAGE_NAME }}:${{ inputs.VERSION }}-${{ matrix.device }}
