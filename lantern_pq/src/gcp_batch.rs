@@ -22,7 +22,7 @@ static CLUSTERING_TASK_TEMPLATE: &'static str = r#"{
            "entrypoint": "/bin/sh",
            "commands": [
              "-c",
-             "/lantern-cli pq-table --uri ${DB_URI} --table ${TABLE} --column ${COLUMN} --clusters ${CLUSTERS} --splits ${SPLITS} --subvector-id ${BATCH_TASK_INDEX} --skip-table-setup --skip-vector-compression; exit $?"
+             "/lantern-cli pq-table --uri ${DB_URI} --table ${TABLE} --column ${COLUMN} --clusters ${CLUSTERS} --splits ${SPLITS} --parallel-task-count ${PARALLEL_TASK_COUNT} --subvector-id ${BATCH_TASK_INDEX} --skip-table-setup --skip-vector-compression; exit $?"
            ]
          },
          "environment": {
@@ -32,6 +32,7 @@ static CLUSTERING_TASK_TEMPLATE: &'static str = r#"{
              "COLUMN": "{column}",
              "CLUSTERS": "{cluster_count}",
              "SPLITS": "{splits}"
+             "PARALLEL_TASK_COUNT": "{gcp_compression_task_parallelism}"
            }
          }
        }
@@ -63,7 +64,7 @@ static COMPRESSION_TASK_TEMPLATE: &'static str = r#"{
            "entrypoint": "/bin/sh",
            "commands": [
              "-c",
-             "/lantern-cli pq-table --uri ${DB_URI} --table ${TABLE} --column ${COLUMN} --clusters ${CLUSTERS} --splits ${SPLITS} --skip-table-setup --only-compress --compression-task-count ${COMPRESSION_TASK_COUNT} --compression-task-id ${BATCH_TASK_INDEX}; exit $?"
+             "/lantern-cli pq-table --uri ${DB_URI} --table ${TABLE} --column ${COLUMN} --clusters ${CLUSTERS} --splits ${SPLITS} --skip-table-setup --skip-codebook-creation --total-task-count ${COMPRESSION_TASK_COUNT} --prallel-task-count ${PARALLEL_TASK_COUNT} --compression-task-id ${BATCH_TASK_INDEX}; exit $?"
            ]
          },
          "environment": {
@@ -74,6 +75,7 @@ static COMPRESSION_TASK_TEMPLATE: &'static str = r#"{
              "CLUSTERS": "{cluster_count}",
              "SPLITS": "{splits}",
              "COMPRESSION_TASK_COUNT": "{gcp_compression_task_count}"
+             "PARALLEL_TASK_COUNT": "{gcp_compression_task_parallelism}"
            }
          }
        }
@@ -316,6 +318,8 @@ pub fn quantize_table_on_gcp(
             ["CLUSTERS"] = json!(args.clusters.to_string());
         body_json["taskGroups"][0]["taskSpec"]["runnables"][0]["environment"]["variables"]
             ["SPLITS"] = json!(args.splits.to_string());
+        body_json["taskGroups"][0]["taskSpec"]["runnables"][0]["environment"]["variables"]
+            ["PARALLEL_TASK_COUNT"] = json!(gcp_clustering_task_parallelism.to_string());
         body_json["taskGroups"][0]["taskSpec"]["computeResource"]["cpuMilli"] =
             json!(gcp_clustering_cpu_count * 1000);
         body_json["taskGroups"][0]["taskSpec"]["computeResource"]["memoryMib"] =
@@ -354,6 +358,8 @@ pub fn quantize_table_on_gcp(
             ["SPLITS"] = json!(args.splits.to_string());
         body_json["taskGroups"][0]["taskSpec"]["runnables"][0]["environment"]["variables"]
             ["COMPRESSION_TASK_COUNT"] = json!(gcp_compression_task_count.to_string());
+        body_json["taskGroups"][0]["taskSpec"]["runnables"][0]["environment"]["variables"]
+            ["PARALLEL_TASK_COUNT"] = json!(gcp_compression_task_parallelism.to_string());
         body_json["taskGroups"][0]["taskSpec"]["computeResource"]["cpuMilli"] =
             json!(gcp_compression_cpu_count * 1000);
         body_json["taskGroups"][0]["taskSpec"]["computeResource"]["memoryMib"] =

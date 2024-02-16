@@ -380,7 +380,7 @@ If you prefer to orchestrate task on your own on premise servers you need to do 
 1. Run setup job. This will create necessary tables and add `pqvec` column on target table
 
 ```bash
-lantern-cli pq-table --uri 'postgres://postgres@127.0.0.1:5432/postgres' --table sift10k --column v --clusters 256 --splits 32 --setup-only
+lantern-cli pq-table --uri 'postgres://postgres@127.0.0.1:5432/postgres' --table sift10k --column v --clusters 256 --splits 32 --skip-codebook-creation --skip-vector-compression
 ```
 
 2. Run clustering job. This will create codebook for the table and export to postgres table
@@ -394,7 +394,7 @@ In this case this command should be run 32 times for each subvector in range [0-
 3. Run compression job. This will compress vectors using the generated codebook and export results under `pqvec` column
 
 ```bash
-lantern-cli pq-table --uri 'postgres://postgres@127.0.0.1:5432/postgres' --table sift10k --column v --clusters 256 --splits 32 --skip-table-setup --skip-codebook-creation --only-compress --parallel-task-count 10 --total-task-count 10 --compression-task-id 0
+lantern-cli pq-table --uri 'postgres://postgres@127.0.0.1:5432/postgres' --table sift10k --column v --clusters 256 --splits 32 --skip-table-setup --skip-codebook-creation --parallel-task-count 10 --total-task-count 10 --compression-task-id 0
 ```
 
 In this case this command should be run 10 times for each part of codebook in range [0-9] and `--parallel-task-count` means at most we will run 10 tasks in parallel. This is used to not exceed max connection limit on postgres.
